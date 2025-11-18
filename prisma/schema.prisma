@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id         String      @id @default(cuid())
+  email      String      @unique @db.VarChar(255)
+  username   String?     @db.VarChar(255)
+  lastLogin  DateTime?
+  onboarded  Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  workspace  Workspace?
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  email     String   @db.VarChar(255)
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+
+model Workspace {
+  id        String          @id @default(cuid())
+  userId    String          @unique
+  name      String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bases     KnowledgeBase[]
+
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+
+model KnowledgeBase {
+  id          String        @id @default(cuid())
+  workspaceId String
+  name        String
+  isPublic    Boolean       @default(false)
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  documents   Document[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([workspaceId])
+}
+
+
+model Document {
+  id         String        @id @default(cuid())
+  baseId     String
+  name       String
+  type       String
+  size       Int
+  uploadedAt DateTime      @default(now())
+
+  base       KnowledgeBase @relation(fields: [baseId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([baseId])
+}
