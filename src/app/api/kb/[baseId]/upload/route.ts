@@ -6,6 +6,7 @@ import { KBService } from "@/lib/kb-service";
 import { processKnowledgeDocument } from "@/lib/kb-pipeline";
 import { SUPPORTED_EXTENSIONS, SUPPORTED_MIME_TYPES, SupportedExtension, SupportedMimeType } from "@/lib/file-processing/types";
 import { getFileExtension } from "@/lib/utils/file";
+import { StorageFactory } from "@/lib/storage/storage-factory";
 
 
 export async function POST(req: Request, context: { params: Promise<{ baseId: string }> }) {
@@ -52,18 +53,20 @@ export async function POST(req: Request, context: { params: Promise<{ baseId: st
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
+        const storage = StorageFactory.getProvider();
+
+        const storageKey = `kb/${user.workspace.id}/${base.id}/${Date.now()}-${file.name}`;
+        if (storage.upload) {
+            await storage.upload(storageKey, buffer, file.type);
+        }
+
         const doc = await KBService.addDocument({
             name: file.name,
             type: file.type,
             size: file.size,
             baseId: base.id,
+            url: storageKey,
         });
-
-        // ---- FILE PROCESSING (async) ----
-
-        processKnowledgeDocument(doc, file, buffer)
-            .then(() => console.log("File processing..."))
-            .catch((err: any) => console.error(err));
 
         return NextResponse.json({
             ok: true,

@@ -14,9 +14,9 @@ export class VectorDB {
         await this.driver.initCollection(collection);
     }
 
-    async addDocument(collection: string, id: string, text: string, payload: any = {}) {
+    async addDocument(collection: string, id: string, text: string, meta: any = {}) {
         const vector = await this.embedder(text);
-        await this.driver.upsert(collection, [{ id, vector, payload: { text, ...payload } }]);
+        await this.driver.upsert(collection, [{ id, vector, payload: { text, ...meta } }]);
         return { id, text };
     }
 

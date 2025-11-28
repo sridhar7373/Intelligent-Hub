@@ -3,8 +3,8 @@ import { randomInt } from "crypto";
 import jwt from "jsonwebtoken";
 import { addMinutes, isBefore } from "date-fns";
 import { BadRequestException, UnauthorizedException } from "./exceptions";
+import { env } from "./env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_key";
 
 export class AuthService {
 
@@ -12,7 +12,7 @@ export class AuthService {
     static async generateOTP(email: string) {
 
         const code = randomInt(100000, 999999).toString();
-        const expiresAt = addMinutes(new Date(), 10);
+        const expiresAt = addMinutes(new Date(), parseInt(env.OTP_EXPIRY_MINUTES));
 
         // 1. Invalidate all previous OTPs
         await prisma.oTP.updateMany({
@@ -114,14 +114,14 @@ export class AuthService {
     static generateToken(userId: string) {
         return jwt.sign(
             { userId },
-            JWT_SECRET,
-            { expiresIn: "7d" }
+            env.JWT_SECRET,
+            { expiresIn: env.JWT_EXPIRES_IN as any }
         );
     }
 
     static verifyToken(token: string) {
         try {
-            return jwt.verify(token, JWT_SECRET) as { userId: string };
+            return jwt.verify(token, env.JWT_SECRET) as { userId: string };
         }
         catch {
             return null;

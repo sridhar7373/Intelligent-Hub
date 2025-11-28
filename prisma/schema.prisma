@@ -69,6 +69,7 @@ model Document {
   name       String
   type       String
   size       Int
+  url        String
   uploadedAt DateTime      @default(now())
 
   base       KnowledgeBase @relation(fields: [baseId], references: [id], onDelete: Cascade)
