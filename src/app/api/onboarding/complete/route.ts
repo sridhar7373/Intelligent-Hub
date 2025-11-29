@@ -8,7 +8,7 @@ import { BadRequestException } from "@/lib/exceptions";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await AuthGuard.canActivate(req);
+    const { id: userId } = await AuthGuard.canActivate(req);
     const body = await req.json();
     const validated = await Validator.validate(OnboardingSchema, body);
     const user = await AuthService.completeOnboarding(userId, validated.username, validated.workspaceName, validated.kbName);

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { addMinutes, isBefore } from "date-fns";
 import { BadRequestException, UnauthorizedException } from "./exceptions";
 import { env } from "./env";
+import { Prisma } from "@prisma/client";
 
 
 export class AuthService {
@@ -63,7 +64,7 @@ export class AuthService {
         const existing = await prisma.user.findUnique({ where: { email } });
         if (existing) return existing;
 
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const user = await tx.user.create({
                 data: {
                     email,
