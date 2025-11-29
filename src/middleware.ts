@@ -4,17 +4,25 @@ import { onboardingMiddleware } from "./middleware/onboarding";
 import { loginMiddleware } from "./middleware/login";
 
 export async function middleware(req: NextRequest) {
+
+  const path = req.nextUrl.pathname;
   // 1) AUTH
-  const authResult = await authMiddleware(req);
-  if (authResult) return authResult; 
+  if (path.startsWith("/kb") || path.startsWith("/onboarding")) {
+    const authResult = await authMiddleware(req);
+    if (authResult) return authResult;
+  }
 
   // 2) ONBOARDING RULES
-  const onboardingResult = onboardingMiddleware(req);
-  if (onboardingResult) return onboardingResult;
+  if (path.startsWith("/onboarding")) {
+    const onboardingResult = onboardingMiddleware(req);
+    if (onboardingResult) return onboardingResult;
+  }
 
   // 3. BLOCK LOGIN FOR AUTHENTICATED USERS
-  const loginCheck = loginMiddleware(req);
-  if (loginCheck) return loginCheck;
+  if (path === "/login" || path === "/verify-otp") {
+    const loginCheck = loginMiddleware(req);
+    if (loginCheck) return loginCheck;
+  }
 
   // Done → continue to route
   return NextResponse.next();

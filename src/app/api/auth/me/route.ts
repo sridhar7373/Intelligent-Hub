@@ -3,10 +3,12 @@ import prisma from "@/lib/prisma";
 import { AuthGuard } from "@/lib/guards/auth-guard";
 import { handleApiError } from "@/lib/exceptions/handler";
 import { NotFoundException } from "@/lib/exceptions";
+import { SubscriptionService } from "@/lib/subscription-service";
 
 export async function GET(req: Request) {
     try {
         const user = await AuthGuard.canActivate(req);
+        const planDetails = await SubscriptionService.getUserPlan(user.id);
         return NextResponse.json({
             ok: true,
             user: {
@@ -23,6 +25,7 @@ export async function GET(req: Request) {
                     }
                     : null,
                 kb: user.workspace?.bases?.[0] ?? null,
+                plan: planDetails,
             },
         });
 

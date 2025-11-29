@@ -7,6 +7,8 @@ import { processKnowledgeDocument } from "@/lib/kb-pipeline";
 import { SUPPORTED_EXTENSIONS, SUPPORTED_MIME_TYPES, SupportedExtension, SupportedMimeType } from "@/lib/file-processing/types";
 import { getFileExtension } from "@/lib/utils/file";
 import { StorageFactory } from "@/lib/storage/storage-factory";
+import { SubscriptionService } from "@/lib/subscription-service";
+import { FeatureKey } from "@/types/plan";
 
 
 export async function POST(req: Request, context: { params: Promise<{ baseId: string }> }) {
@@ -48,6 +50,12 @@ export async function POST(req: Request, context: { params: Promise<{ baseId: st
             );
         }
 
+        const docLimit = await SubscriptionService.getFeatureValue(user.workspace.id, FeatureKey.DOCUMENTS);
+        const currentDocCount = await KBService.countDocumentsInBase(base.id);
+        if (currentDocCount >= docLimit) {
+            throw new BadRequestException(`Document limit reached. Your current plan allows up to ${docLimit} documents. Please upgrade your plan to add more documents.`
+            );
+        }
         // ---- FILE READ ----
 
         const arrayBuffer = await file.arrayBuffer();

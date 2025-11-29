@@ -2,6 +2,7 @@ import { NotFoundException, UnauthorizedException } from "@/lib/exceptions";
 import { AuthService } from "@/lib/auth-service";
 import { CookieUtil } from "@/lib/utils/cookie";
 import prisma from "@/lib/prisma";
+import { FREE_PLAN } from "../constonts";
 
 export class AuthGuard {
     static async extractToken(req: Request): Promise<string | null> {
@@ -34,7 +35,7 @@ export class AuthGuard {
                 workspace: {
                     include: {
                         bases: true
-                    }
+                    },
                 },
             },
         });

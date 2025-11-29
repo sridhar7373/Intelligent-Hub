@@ -64,4 +64,13 @@ export class KBService {
             throw new BadRequestException(err.message);
         }
     }
+
+    static async countDocumentsInBase(baseId: string) {
+        const count = await prisma.document.count({
+            where: {
+                baseId
+            }
+        });
+        return count;
+    }
 }

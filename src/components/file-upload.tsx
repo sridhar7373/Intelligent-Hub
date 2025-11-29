@@ -3,6 +3,7 @@
 import { FileWithPreview, useFileUpload } from "@/hooks/use-file-upload";
 import { UploadIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRef } from "react";
 
 interface FileUploadProps {
     maxFiles?: number;
@@ -36,14 +37,20 @@ export default function FileUpload({
             handleDragOver,
             handleDrop,
             openFileDialog,
-            removeFile,
             getInputProps,
+            clearFiles,
+            removeFile
         },
     ] = useFileUpload({
         multiple,
         maxFiles,
         maxSize,
-        onFilesAdded: onFilesAdded,
+        onFilesAdded: ((files: FileWithPreview[]) => {
+            if (onFilesAdded) {
+                onFilesAdded(files);
+            }
+            clearFiles();
+        }),
     });
 
     return (

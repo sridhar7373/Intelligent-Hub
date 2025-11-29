@@ -23,7 +23,7 @@ function KBPage({ user }: WithAuthProps) {
     const baseId = params.baseId as string;
 
     const { data, error, isLoading, mutate: fetchKb } = useKnowldegeBase(baseId);
-    const { trigger: uploadDoc } = useKBUpload(baseId);
+    const { trigger: uploadDoc, error: uploadError } = useKBUpload(baseId);
     const { trigger: deleteDoc, isMutating: deleting } = useKBDelete(baseId);
 
     function getFileCategory(type: string) {
@@ -39,29 +39,28 @@ function KBPage({ user }: WithAuthProps) {
         return "Other";
     }
 
-    function getFileIconSrc(type: string)
-    {
+    function getFileIconSrc(type: string) {
         const ext = getFileCategory(type).toLowerCase();
         switch (ext) {
-        case "pdf":
-            return "/icons/pdf.png";
-        case "docx":
-        case "doc":
-            return "/icons/docx.png";
-        case "xlsx":
-        case "xls":
-            return "/icons/xlsx.png";
-        case "csv":
-            return "/icons/csv.png";
-        case "json":
-            return "/icons/json.png";
-        case "yaml":
-        case "yml":
-            return "/icons/yaml.png";
-        case "md":
-            return "/icons/md.png";
-        case "txt":
-            return "/icons/txt.png";
+            case "pdf":
+                return "/icons/pdf.png";
+            case "docx":
+            case "doc":
+                return "/icons/docx.png";
+            case "xlsx":
+            case "xls":
+                return "/icons/xlsx.png";
+            case "csv":
+                return "/icons/csv.png";
+            case "json":
+                return "/icons/json.png";
+            case "yaml":
+            case "yml":
+                return "/icons/yaml.png";
+            case "md":
+                return "/icons/md.png";
+            case "txt":
+                return "/icons/txt.png";
         }
         return "/icons/json.png"
     }
@@ -94,24 +93,35 @@ function KBPage({ user }: WithAuthProps) {
     if (error || !data) return <div>Error loading KB</div>;
 
     // Upload handler
-    function onFilesAdded(files: FileWithPreview[]) {
-        files.forEach((file) => {
+    async function onFilesAdded(files: FileWithPreview[]) {
+        for (const file of files) {
             const form = new FormData();
             form.append("file", file.file as File);
 
-            toast.promise(
-                uploadDoc(form).then(() => fetchKb()),
-                {
-                    loading: `Uploading ${file.file.name}...`,
-                    success: `${file.file.name} uploaded successfully!`,
-                    error: `Failed to upload ${file.file.name}`,
-                }
-            );
-        });
+            const uploadToast = toast.loading(`Uploading ${file.file.name}...`);
+
+            try {
+                const data = await uploadDoc(form); // must return parsed JSON
+                await fetchKb();
+
+                toast.success(data.title || "Upload Successful", {
+                    id: uploadToast,
+                    description: data.message || `${file.file.name} uploaded successfully!`,
+                });
+
+            } catch (err: any) {
+                const apiMessage = err?.response?.data?.message || err?.message;
+
+                toast.error("Upload Failed", {
+                    id: uploadToast,
+                    description: apiMessage || `Failed to upload ${file.file.name}`,
+                });
+            }
+        }
     }
 
-    function onFileDelete (file:any)
-    {
+
+    function onFileDelete(file: any) {
         toast.promise(
             deleteDoc(file.id).then(() => fetchKb()),
             {

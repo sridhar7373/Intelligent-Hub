@@ -197,14 +197,14 @@ export const useFileUpload = (
 
       newFilesArray.forEach((file) => {
         // Only check for duplicates if multiple files are allowed
-        if (multiple) {
+        if (multiple && state.files.length > 0) {
           const isDuplicate = state.files.some(
             (existingFile) =>
               existingFile.file.name === file.name &&
-              existingFile.file.size === file.size
+              existingFile.file.size === file.size &&
+              existingFile.preview === URL.createObjectURL(file) // ensures same object
           )
 
-          // Skip duplicate files silently
           if (isDuplicate) {
             return
           }

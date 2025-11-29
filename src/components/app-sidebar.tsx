@@ -6,6 +6,8 @@ import { BotIcon, Command, Database } from "lucide-react";
 import { MenuItem, NavMain } from "./nav-main";
 import { User } from "@/types/user";
 import { NavUser } from "./nav-user";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
 
 
 export function AppSidebar({ user, ...props }: {  user: User } &React.ComponentProps<typeof Sidebar>) {
@@ -50,6 +52,24 @@ export function AppSidebar({ user, ...props }: {  user: User } &React.ComponentP
                 <NavMain items={navMain} />
             </SidebarContent>
             <SidebarFooter>
+                {user.plan.id === "free" && (
+                    <Card className="p-4 shadow-none border rounded-xl space-y-4">
+                        <CardHeader className="p-0 space-y-1">
+                            <CardTitle className="text-base font-medium">
+                            Upgrade Plan
+                            </CardTitle>
+                            <CardDescription className="text-sm text-muted-foreground">
+                            Unlock premium features & higher limits.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="p-0">
+                            <Button size="sm" className="w-full" asChild>
+                            <a href="/upgrade">Upgrade Plan</a>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
                 <NavUser user={user} />
             </SidebarFooter>
         </Sidebar>

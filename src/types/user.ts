@@ -1,3 +1,5 @@
+import { Plan } from "./plan";
+
 export interface Workspace {
   id: string;
   userId: string;
@@ -20,4 +22,5 @@ export interface User {
   createdAt: string;
   workspace?: Workspace | null;
   kb?: KnowledgeBase | null;
+  plan: Plan;
 }
