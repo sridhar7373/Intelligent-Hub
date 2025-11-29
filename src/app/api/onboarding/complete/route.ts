@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validated = await Validator.validate(OnboardingSchema, body);
     const user = await AuthService.completeOnboarding(userId, validated.username, validated.workspaceName, validated.kbName);
-    if(!user){
+    if (!user) {
       throw new BadRequestException("Onboarding")
     }
     return NextResponse.json({ ok: true, user });
