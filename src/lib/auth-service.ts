@@ -71,16 +71,14 @@ export class AuthService {
                     createdAt: new Date(),
                 }
             });
-            return user; 
+            return user;
         });
 
         return result;
     }
 
-    static async completeOnboarding(userId: string, username: string, workspaceName: string, kbName: string)
-    {
-        try
-        {
+    static async completeOnboarding(userId: string, username: string, workspaceName: string, kbName: string) {
+        try {
             const updatedUser = await prisma.$transaction(async (tx) => {
                 const user = await tx.user.update({
                     where: { id: userId },
@@ -97,9 +95,9 @@ export class AuthService {
                     },
                 });
                 await tx.knowledgeBase.create({
-                    data: { 
+                    data: {
                         workspaceId: workspace.id,
-                        name: kbName 
+                        name: kbName
                     },
                 });
                 return user;
